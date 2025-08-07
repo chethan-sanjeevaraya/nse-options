@@ -104,7 +104,7 @@ def option_contracts(ticker, option_type="BOTH", exchange="NFO"):
                 option_contracts.append(instrument)
     return pd.DataFrame(option_contracts)
 
-def option_contracts_closest(ticker, duration=0, option_type="CE", exchange="NFO"):
+def option_contracts_closest(ticker, duration=0, option_type="BOTH", exchange="NFO"):
     df_opt_contracts = option_contracts(ticker, option_type, exchange)
     if df_opt_contracts.empty:
         return pd.DataFrame()
@@ -112,7 +112,7 @@ def option_contracts_closest(ticker, duration=0, option_type="CE", exchange="NFO
     min_day_count = np.sort(df_opt_contracts["time_to_expiry"].unique())[duration]
     return df_opt_contracts[df_opt_contracts["time_to_expiry"] == min_day_count].reset_index(drop=True)
 
-def option_chain(ticker, underlying_price, duration=0, num=5, option_type="CE", exchange="NFO"):
+def option_chain(ticker, underlying_price, duration=0, num=5, option_type="BOTH", exchange="NFO"):
     df_opt_contracts = option_contracts_closest(ticker, duration, option_type, exchange)
     if df_opt_contracts.empty:
         return pd.DataFrame()
