@@ -1,0 +1,8 @@
+kiteconnect
+pandas
+flask
+python-dotenv
+datetime
+nsepy
+yfinance
+matplotlib
