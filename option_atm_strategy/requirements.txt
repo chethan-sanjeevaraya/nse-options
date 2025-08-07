@@ -1,0 +1,10 @@
+kiteconnect
+pandas
+flask
+python-dotenv
+datetime
+nsepy
+yfinance
+matplotlib
+streamlit
+streamlit_autorefresh

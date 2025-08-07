@@ -1,0 +1,5 @@
+kiteconnect
+pandas
+python-dotenv
+datetime
+streamlit
