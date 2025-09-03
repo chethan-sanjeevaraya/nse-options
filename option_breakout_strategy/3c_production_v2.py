@@ -1,4 +1,4 @@
-# t6_final.py
+# t8_final.py
 """
 Production-ready intraday strategy (spot/futures separation + dynamic ATM options).
 
@@ -390,26 +390,68 @@ def place_protected_sell(kite, symbol, qty, entry_price, leg_type, dry_run=False
 # 13. PnL Calculation --------------------
 def compute_realized_pnl(kite, trade):
     """
-    Calculate the realized PnL (Profit and Loss) for a single option trade.
+    Compute realized PnL for a completed trade.
+
+    Parameters
+    ----------
+    kite : object
+        Authenticated Kite Connect instance.
+    trade : dict
+        Trade dictionary with keys:
+        - 'symbol': str, tradingsymbol
+        - 'qty': int, traded quantity
+        - 'entry_ltp': float, entry price
+        - 'leg': str, leg type (CE_SHORT / PE_SHORT)
+
+    Returns
+    -------
+    float
+        Realized PnL value (positive for profit, negative for loss).
     """
-    try:
-        trades = retry_kite_call(kite.trades)
-        if not trades:
-            return 0.0
-        fills = [t for t in trades if t["order_id"] == trade.get("sl_id") or t["order_id"] == trade.get("tp_id")]
-        if not fills:
-            return 0.0
-        # assume sell avg vs buy avg
-        sell_price = trade.get("entry_ltp", 0.0)
-        buy_price = sum(f["average_price"] for f in fills) / len(fills)
-        if trade["leg"] == "CE":
-            return (sell_price - buy_price) * trade["qty"]
-        else:
-            return (sell_price - buy_price) * trade["qty"]
-    except Exception as e:
-        logging.warning("PnL computation failed: %s", e)
+    if not trade or "symbol" not in trade or "entry_ltp" not in trade:
         return 0.0
 
+    try:
+        ltp_data = kite.ltp([trade["symbol"]])
+        buy_price = ltp_data[trade["symbol"]]["last_price"]
+    except Exception as e:
+        logging.error("PnL fetch failed for %s: %s", trade.get("symbol"), e)
+        return 0.0
+
+    sell_price = trade["entry_ltp"]
+    qty = trade.get("qty", 0)
+
+    # For short trades, PnL = (Sell - Buy) * Qty
+    return (sell_price - buy_price) * qty
+
+def calculate_sl_tp(entry_price, leg_type):
+    """
+    Calculate stop-loss (SL) and take-profit (TP) for a short option trade.
+
+    Parameters
+    ----------
+    entry_price : float
+        Entry price of the option.
+    leg_type : str
+        Trade leg type ("CE_SHORT" or "PE_SHORT").
+
+    Returns
+    -------
+    tuple (sl, tp)
+        Stop-loss and target-profit levels, rounded to 1 decimal.
+        Returns (None, None) if entry_price is invalid.
+    """
+    if not entry_price or entry_price <= 0:
+        return None, None
+
+    if leg_type in ("CE_SHORT", "PE_SHORT"):
+        sl = entry_price * (1 + SL_PCT) + SL_BUFFER
+        tp = entry_price * (1 - TP_PCT)
+    else:
+        logging.warning("Unknown leg_type %s for SL/TP calculation", leg_type)
+        return None, None
+
+    return round(sl, 1), round(tp, 1)
 #14. Forcefully close all open trade -------------------------------------------------
 def force_exit_open_trades(kite, trades):
     """
@@ -431,18 +473,29 @@ def force_exit_open_trades(kite, trades):
 #15. Cal. SL & TP------------------------------------------------------------------------
 def calculate_sl_tp(entry_price, leg_type):
     """
-    Calculate stop-loss (SL) and target-profit (TP) levels for an option trade.
+    Calculate stop-loss (SL) and take-profit (TP) for a short option trade.
+
+    Parameters
+    ----------
+    entry_price : float
+        Entry price of the option.
+    leg_type : str
+        Trade leg type ("CE_SHORT" or "PE_SHORT").
+
+    Returns
+    -------
+    tuple (sl, tp)
+        Stop-loss and target-profit levels, rounded to 1 decimal.
+        Returns (None, None) if entry_price is invalid.
     """
     if not entry_price or entry_price <= 0:
         return None, None
 
-    if leg_type in ("CE_SHORT", "PE_SHORT"):  # short options
+    if leg_type in ("CE_SHORT", "PE_SHORT"):
         sl = entry_price * (1 + SL_PCT) + SL_BUFFER
         tp = entry_price * (1 - TP_PCT)
-    elif leg_type in ("CE_LONG", "PE_LONG"):  # if you add longs later
-        sl = entry_price * (1 - SL_PCT) + SL_BUFFER
-        tp = entry_price * (1 + TP_PCT)
     else:
+        logging.warning("Unknown leg_type %s for SL/TP calculation", leg_type)
         return None, None
 
     return round(sl, 1), round(tp, 1)
