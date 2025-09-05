@@ -151,3 +151,10 @@
 2025-09-05 10:52:23,330 | INFO | Using NIFTY future contract: NIFTY25SEPFUT | expiry=2025-09-30 00:00:00 | token=13568258
 2025-09-05 10:52:23,381 | INFO | Candle 10:45:00-10:50:00 | O=24796.30 H=24810.00 L=24785.00 C=24790.00 V=40275 | Type=RED | FUT=NIFTY25SEPFUT Exp=2025-09-30 | Position=None | PnL : Realized=0.00, Unrealized=0.00 | Entries=0 | ReEntry=False
 2025-09-05 10:55:01,054 | INFO | Candle 10:50:00-10:55:00 | O=24790.00 H=24792.40 L=24762.10 C=24766.60 V=38325 | Type=RED | FUT=NIFTY25SEPFUT Exp=2025-09-30 | Position=None | PnL : Realized=0.00, Unrealized=0.00 | Entries=0 | ReEntry=False
+2025-09-05 11:00:00,899 | INFO | Candle 10:55:00-11:00:00 | O=24761.60 H=24780.00 L=24761.00 C=24780.00 V=32475 | Type=GREEN | FUT=NIFTY25SEPFUT Exp=2025-09-30 | Position=None | PnL : Realized=0.00, Unrealized=0.00 | Entries=0 | ReEntry=False
+2025-09-05 11:00:01,331 | INFO | Entry placed: 250905200521039
+2025-09-05 11:00:01,369 | WARNING | GTT OCO placement failed for NIFTY2590924800CE: 'KiteConnect' object has no attribute 'GTT_OCO'
+2025-09-05 11:00:01,443 | ERROR | Fallback MIS SL/TP placement failed for NIFTY2590924800CE: Your order price is higher than the current [upper circuit limit](https://support.zerodha.com/category/trading-and-markets/trading-faqs/articles/what-does-circuit-limits-i-e-price-bands-mean) of 363.05. You can place an order within the range or [use GTT](https://support.zerodha.com/category/trading-and-markets/gtt/articles/what-is-the-good-till-triggered-gtt-feature) for long-standing orders.
+2025-09-05 11:00:01,444 | INFO | Entered trade SHORT_CE | NIFTY2590924800CE | entry_underlying=24780.00 SL=24760.50 TP=24819.00 lot=75
+2025-09-05 11:00:47,320 | INFO | Detected external exit for NIFTY2590924800CE entry=52.10 exit=51.65 realized=33.75
+2025-09-05 11:00:47,320 | INFO | Trade closed externally (realized=33.75). entries_taken=1
